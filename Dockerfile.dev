@@ -1,0 +1,7 @@
+FROM elasticsearch:1.5.1
+RUN plugin -install mobz/elasticsearch-head \
+    && plugin -install elasticsearch/elasticsearch-analysis-icu/1.11.0
+ADD ./eea-rdf-river.zip /tmp/
+RUN unzip /tmp/eea-rdf-river.zip -d \
+          /usr/share/elasticsearch/plugins/eea-rdf-river || true
+COPY config /usr/share/elasticsearch/config
