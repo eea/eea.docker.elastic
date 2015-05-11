@@ -72,16 +72,18 @@ the container.
 ### Keeping the data persistent
 
 By default the data is stored inside a volume.
-The voulume is mounted inside the container at ```/usr/share/elasticsearch/data```.
+The voulume is mounted inside the container at
+```/usr/share/elasticsearch/data```
 
 In order to create backups of the data just run another container with
-```--volumes-from```. e.g. Make a backup on your local system at ```/path/to/backup```.
+```--volumes-from```. e.g. Make a backup on your local system at
+```/path/to/backup```.
 
 ```bash
 docker run --volumes-from myelasticsearch -v /path/to/backup/:/backup busybox cp -r /usr/share/elasticsearch/data /backup
 ```
 
-Alternatively you can mount that directory at a local path
+Alternatively you can mount that directory onto a local path
 
 
 ## Development
@@ -94,8 +96,11 @@ pushd /your/work/dir
 git clone git@github.com:eea/eea.elasticsearch.river.rdf.git
 # modify the code there
 popd
-./build_dev.sh /your/work/dir/eea.elasticsearch.river.rdf
-# Now you have a local image called eeacms/elastic:latest that you can use
+./build_dev.sh
+# Now you have a local image called eeacms/elastic:dev that you can use
 # locally with your latest build of the river plugin
 ```
+
+As a general practice, if you want to build the image locally:
+```docker build -t eeacms/elastic:dev .```
 

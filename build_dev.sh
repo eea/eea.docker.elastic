@@ -24,7 +24,7 @@ popd
 echo "Building Image"
 PLUGIN=$(find ${PLUGIN_DIR} -name "eea-rdf-river-plugin-*.zip")
 cp ${PLUGIN} ./eea-rdf-river.zip
-docker build -f Dockerfile.dev -t eeacms/elastic .
+docker build -f Dockerfile.dev -t eeacms/elastic:dev .
 rm ./eea-rdf-river.zip
 
 echo "Done"
