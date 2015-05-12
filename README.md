@@ -17,7 +17,7 @@ the cluster.
 
 ### Runing a master only node
 This ensures that the node can't hold data and can't be accessed with
-the HTTP API.
+the HTTP API. Also this node can't run river processes.
 
 ```yaml
 esmaster:
@@ -27,11 +27,13 @@ esmaster:
         - -Des.node.data=false
         - -Des.http.enabled=false
         - -Des.node.master=true
+        - -Des.node.river=_none_
 ```
 
 ### Running a client
 This ensures that the node can't be elected as master and is in charge
-only for responding to HTTP requests for clients
+only for responding to HTTP requests for clients. Also this node can't run
+river processes.
 
 ```yaml
 esclient:
@@ -42,6 +44,7 @@ esclient:
         - -Des.node.data=false
         - -Des.http.enabled=true
         - -Des.node.master=false
+        - -Des.node.river=_none_
 ```
 
 ### Running a data node
@@ -72,8 +75,10 @@ the container.
 ### Keeping the data persistent
 
 By default the data is stored inside a volume.
-The voulume is mounted inside the container at
-```/usr/share/elasticsearch/data```
+The voulume is mounted inside the container at ```/usr/share/elasticsearch/data```
+
+You can also create a propper data volume by running for example a busybox container
+having as a volume ```/usr/share/elasticsearch/data```
 
 In order to create backups of the data just run another container with
 ```--volumes-from```. e.g. Make a backup on your local system at
