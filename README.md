@@ -81,8 +81,7 @@ You can also create a propper data volume by running for example a busybox conta
 having as a volume ```/usr/share/elasticsearch/data```
 
 In order to create backups of the data just run another container with
-```--volumes-from```. e.g. Make a backup on your local system at
-```/path/to/backup```.
+```--volumes-from```. e.g. Make a backup on your local system at ```/path/to/backup```.
 
 ```bash
 docker run --volumes-from myelasticsearch -v /path/to/backup/:/backup busybox cp -r /usr/share/elasticsearch/data /backup
