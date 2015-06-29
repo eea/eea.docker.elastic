@@ -1,5 +1,4 @@
 FROM elasticsearch:1.3
-#ENV RIVER_VERSION=1.5.6
 ENV ANALYSIS_VERSION=2.3.0
 RUN plugin -install mobz/elasticsearch-head \
     && plugin -install elasticsearch/elasticsearch-analysis-icu/${ANALYSIS_VERSION}
