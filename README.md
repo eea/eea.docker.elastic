@@ -89,6 +89,31 @@ docker run --volumes-from myelasticsearch -v /path/to/backup/:/backup busybox cp
 
 Alternatively you can mount that directory onto a local path
 
+## Monitoring the Elastic cluster health
+
+When running the Elastic cluster in production you would often want to monitor its health status and be notified when the cluster is downa or experience some stability issues. 
+
+A cluster health API is accessible at ```http://<elasticserver-ip>:9200/_cluster/health?pretty=true``` and returns a JSON response like:
+
+```
+{
+  "cluster_name" : "SearchServices",
+  "status" : "green",
+  "timed_out" : false,
+  "number_of_nodes" : 4,
+  "number_of_data_nodes" : 2,
+  "active_primary_shards" : 16,
+  "active_shards" : 32,
+  "relocating_shards" : 0,
+  "initializing_shards" : 0,
+  "unassigned_shards" : 0,
+  "number_of_pending_tasks" : 0
+}
+```
+
+The status will tell you how healthy the cluster is. It can be green, yellow or red. More info at [Elastic cluster health API](https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster-health.html).
+
+Another [Cluster stats API call](https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster-stats.html) will give even more details about memory usage, cpus usage, open file descriptors and so on.
 
 ## Development
 
