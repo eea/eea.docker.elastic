@@ -1,4 +1,4 @@
-FROM elasticsearch:1.5.1
+FROM elasticsearch:1.7.1
 RUN plugin -install mobz/elasticsearch-head \
     && plugin -install elasticsearch/elasticsearch-analysis-icu/1.11.0
 ADD ./eea-rdf-river.zip /tmp/
