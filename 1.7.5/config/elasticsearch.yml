@@ -164,6 +164,5 @@ path:
   logs: /usr/share/elasticsearch/logs
   data: /usr/share/elasticsearch/data
 
-network.host: 0.0.0.0
-
-
+script.inline: on
+script.engine.groovy.inline.aggs: on
