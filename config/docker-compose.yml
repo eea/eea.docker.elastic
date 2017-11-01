@@ -1,0 +1,19 @@
+version: "2"
+services:
+  elastic:
+    image: es563
+    restart: always
+    ports:
+    - "9200:9200"
+    - "9300:9300"
+    environment:
+      TZ: "Europe/Copenhagen"
+
+  eshead:
+    image: mobz/elasticsearch-head:5
+    restart: always
+    environment:
+      TZ: "Europe/Copenhagen"
+    ports:
+    - "9100:9100"
+
