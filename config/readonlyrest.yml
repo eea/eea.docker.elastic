@@ -19,10 +19,12 @@ readonlyrest:
     # Using "Basic HTTP Auth" from browsers, can RW Kibana settings, RO on logstash indices from 2017 .
     - name: "::READ_WRITE_USER::"
       auth_key: RW_USER:RW_PASSWORD
+      verbosity: error # don't log successful request
 
     # Same as above, but cannot change dashboards, visualizations or settings in Kibana
     - name: "::READ_ONLY_USER::"
       auth_key: RO_USER:RO_PASSWORD
       kibana_access: ro
+      verbosity: error # don't log successful request
 
 
