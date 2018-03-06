@@ -11,8 +11,10 @@ if [ $(env | grep -c "http.enabled=false") -eq 0 ]; then
     fi
 
     
-    if [ -f /tmp/readonlyrest-1.16.15_es6.1.1.zip ]; then
-    /usr/share/elasticsearch/bin/elasticsearch-plugin install file:/tmp/readonlyrest-1.16.15_es6.1.1.zip
+    if [ -f /tmp/readonlyrest-* ]; then
+    
+    plugin_name=$(ls /tmp/readonlyrest-*.zip)
+    /usr/share/elasticsearch/bin/elasticsearch-plugin install file:$plugin_name
 
     mv /tmp/readonlyrest.yml /usr/share/elasticsearch/config/readonlyrest.yml
 
@@ -29,7 +31,7 @@ if [ $(env | grep -c "http.enabled=false") -eq 0 ]; then
     sed -i "s/KIBANA_USER/$KIBANA_USER/g" /usr/share/elasticsearch/config/readonlyrest.yml
     sed -i "s/KIBANA_PASSWORD/$KIBANA_PASSWORD/g" /usr/share/elasticsearch/config/readonlyrest.yml
 
-    rm -f /tmp/readonlyrest-1.16.15_es6.1.1.zip
+    rm -f /tmp/readonlyrest-*
 
     fi
 fi
