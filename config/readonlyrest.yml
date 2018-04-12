@@ -27,4 +27,6 @@ readonlyrest:
       kibana_access: ro
       verbosity: error # don't log successful request
 
-
+    - name: "::KIBANA_HOST::"
+      kibana_access: ro_strict
+      hosts: ["KIBANA_HOSTNAME"]

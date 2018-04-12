@@ -31,6 +31,8 @@ if [ $(env | grep -c "http.enabled=false") -eq 0 ]; then
     sed -i "s/KIBANA_USER/$KIBANA_USER/g" /usr/share/elasticsearch/config/readonlyrest.yml
     sed -i "s/KIBANA_PASSWORD/$KIBANA_PASSWORD/g" /usr/share/elasticsearch/config/readonlyrest.yml
 
+    sed -i "s/KIBANA_HOSTNAME/$KIBANA_HOSTNAME/g" /usr/share/elasticsearch/config/readonlyrest.yml
+
     rm -f /tmp/readonlyrest-*
 
     fi

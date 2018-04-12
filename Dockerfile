@@ -1,6 +1,6 @@
-FROM docker.elastic.co/elasticsearch/elasticsearch:6.2.2
+FROM docker.elastic.co/elasticsearch/elasticsearch:6.2.3
 
-COPY plugins/readonlyrest-1.16.16_es6.2.2.zip /tmp/
+COPY plugins/readonlyrest-1.16.18_es6.2.3.zip /tmp/
 
 
 RUN /usr/share/elasticsearch/bin/elasticsearch-plugin remove x-pack \
