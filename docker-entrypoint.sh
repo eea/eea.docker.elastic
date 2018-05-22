@@ -4,6 +4,8 @@ set -e
 
 
 if [ $(env | grep -c "http.enabled=false") -eq 0 ]; then
+    echo "http.type: ssl_netty4" >> /usr/share/elasticsearch/config/elasticsearch.yml
+
     if [ ! -f /usr/share/elasticsearch/ssl/self.jks ]; then
       mkdir -p /usr/share/elasticsearch/ssl
       keytool -genkey -keyalg RSA -noprompt -alias $HOSTNAME -dname "CN=$HOSTNAME,OU=IDM,O=EEA,L=IDM1,C=DK" -keystore /usr/share/elasticsearch/ssl/self.jks -storepass $KEYSTORE_PASSWORD -keypass $KEY_PASSWORD
