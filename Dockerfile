@@ -1,4 +1,6 @@
 FROM docker.elastic.co/elasticsearch/elasticsearch:6.2.4
+#update jdk to solve CVE
+RUN yum install -y java-1.8.0-openjdk-headless
 
 COPY plugins/readonlyrest-1.16.19_es6.2.4.zip /tmp/
 
