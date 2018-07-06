@@ -39,5 +39,5 @@ fi
 
 
 
-exec /usr/local/bin/elastic-entrypoint.sh $@
+exec /usr/local/bin/elastic-entrypoint.sh "$@"
 

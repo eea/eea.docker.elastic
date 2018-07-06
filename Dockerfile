@@ -1,15 +1,10 @@
-FROM docker.elastic.co/elasticsearch/elasticsearch:6.2.4
-#update jdk to solve CVE
-RUN yum install -y java-1.8.0-openjdk-headless
+FROM docker.elastic.co/elasticsearch/elasticsearch-oss:6.3.0
 
-COPY plugins/readonlyrest-1.16.19_es6.2.4.zip /tmp/
+COPY plugins/readonlyrest-1.16.21_es6.3.0.zip /tmp/
 
 
-RUN /usr/share/elasticsearch/bin/elasticsearch-plugin remove x-pack \
-    && /usr/share/elasticsearch/bin/elasticsearch-plugin install analysis-icu 
+RUN /usr/share/elasticsearch/bin/elasticsearch-plugin install analysis-icu 
     
-
-
 RUN mv /usr/local/bin/docker-entrypoint.sh /usr/local/bin/elastic-entrypoint.sh
 
 COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
