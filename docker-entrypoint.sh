@@ -14,7 +14,7 @@ if [ $(env | grep -c "http.enabled=false") -eq 0 ]; then
     if [ $ENABLE_READONLY_REST == "true" ]; then
         if [ -f /tmp/readonlyrest-* ]; then
             plugin_name=$(ls /tmp/readonlyrest-*.zip)
-            /usr/share/elasticsearch/bin/elasticsearch-plugin install file://$plugin_name
+            /usr/share/elasticsearch/bin/elasticsearch-plugin install --force file://$plugin_name 
 
             mv /tmp/readonlyrest.yml /usr/share/elasticsearch/config/readonlyrest.yml
 
