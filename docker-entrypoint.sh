@@ -38,7 +38,8 @@ if [ $(env | grep -c "http.enabled=false") -eq 0 ]; then
     fi
 fi
 
-
+#make sure that elasticsearch volume has correct permissions
+chown -R 1000:0 /usr/share/elasticsearch/data
 
 exec /usr/local/bin/elastic-entrypoint.sh "$@"
 
