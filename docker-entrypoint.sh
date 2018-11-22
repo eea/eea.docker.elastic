@@ -28,10 +28,22 @@ if [ $(env | grep -c "http.enabled=false") -eq 0 ]; then
             sed -i "s/RO_USER/$RO_USER/g" /usr/share/elasticsearch/config/readonlyrest.yml
             sed -i "s/RO_PASSWORD/$RO_PASSWORD/g" /usr/share/elasticsearch/config/readonlyrest.yml
 
-            sed -i "s/KIBANA_USER/$KIBANA_USER/g" /usr/share/elasticsearch/config/readonlyrest.yml
-            sed -i "s/KIBANA_PASSWORD/$KIBANA_PASSWORD/g" /usr/share/elasticsearch/config/readonlyrest.yml
 
-            sed -i "s/KIBANA_HOSTNAME/$KIBANA_HOSTNAME/g" /usr/share/elasticsearch/config/readonlyrest.yml
+            if [ -n "$KIBANA_HOSTNAME" ]; then
+	        echo "	
+    - name: \"::KIBANA_HOST::\"
+      kibana_access: ro_strict
+      hosts: [\"$KIBANA_HOSTNAME\"]
+      verbosity: error # don't log successful request" >> /usr/share/elasticsearch/config/readonlyrest.yml
+                if [ -n "$KIBANA_USER" ]; then
+                       echo "
+    # We trust Kibana's server side process, full access granted via HTTP authentication
+    - name: \"::KIBANA-SRV::\"
+      # auth_key is good for testing, but replace it with `auth_key_sha256`!
+      auth_key: $KIBANA_USER:$KIBANA_PASSWORD
+      verbosity: error # don't log successful request" >> /usr/share/elasticsearch/config/readonlyrest.yml
+                fi
+            fi
 
             rm -f /tmp/readonlyrest-*
         fi

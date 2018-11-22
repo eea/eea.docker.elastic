@@ -10,12 +10,6 @@ readonlyrest:
 
     access_control_rules:
 
-    # We trust Kibana's server side process, full access granted via HTTP authentication
-    - name: "::KIBANA-SRV::"
-      # auth_key is good for testing, but replace it with `auth_key_sha256`!
-      auth_key: KIBANA_USER:KIBANA_PASSWORD
-      verbosity: error # don't log successful request
-
     # Using "Basic HTTP Auth" from browsers, can RW Kibana settings, RO on logstash indices from 2017 .
     - name: "::READ_WRITE_USER::"
       auth_key: RW_USER:RW_PASSWORD
@@ -27,7 +21,3 @@ readonlyrest:
       kibana_access: ro
       verbosity: error # don't log successful request
 
-    - name: "::KIBANA_HOST::"
-      kibana_access: ro_strict
-      hosts: ["KIBANA_HOSTNAME"]
-      verbosity: error # don't log successful request
