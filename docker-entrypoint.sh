@@ -30,7 +30,7 @@ if [ $(env | grep -c "http.enabled=false") -eq 0 ]; then
 
 
             if [ -n "$KIBANA_HOSTNAME" ]; then
-	        echo "	
+	        echo "
     - name: \"::KIBANA_HOST::\"
       kibana_access: ro_strict
       hosts: [\"$KIBANA_HOSTNAME\"]
