@@ -11,10 +11,10 @@ if [ $(env | grep -c "http.enabled=false") -eq 0 ]; then
       $JAVA_HOME/bin/keytool -keystore  /usr/share/elasticsearch/ssl/self.jks -alias $HOSTNAME -export -file  /usr/share/elasticsearch/ssl/self.cert
     fi
 
-    if [ $ENABLE_READONLY_REST == "true" ]; then
+    if [ "$ENABLE_READONLY_REST" == "true" ]; then
         if [ -f /tmp/readonlyrest-* ]; then
             plugin_name=$(ls /tmp/readonlyrest-*.zip)
-            /usr/share/elasticsearch/bin/elasticsearch-plugin install --batch file://$plugin_name 
+            /usr/share/elasticsearch/bin/elasticsearch-plugin install --batch file://$plugin_name
 
             mv /tmp/readonlyrest.yml /usr/share/elasticsearch/config/readonlyrest.yml
 
@@ -53,5 +53,5 @@ fi
 #make sure that elasticsearch volume has correct permissions
 chown -R 1000:0 /usr/share/elasticsearch/data
 
-exec /usr/local/bin/elastic-entrypoint.sh "$@"
+exec /elastic-entrypoint.sh "$@"
 

@@ -1,15 +1,11 @@
-FROM docker.elastic.co/elasticsearch/elasticsearch:5.6.14
+FROM elasticsearch:5.6.14
 
 COPY plugins/readonlyrest-1.16.29_es6.5.0.zip /tmp/
 
+RUN /usr/share/elasticsearch/bin/elasticsearch-plugin install analysis-icu
+RUN mv /docker-entrypoint.sh /elastic-entrypoint.sh
 
-RUN /usr/share/elasticsearch/bin/elasticsearch-plugin remove x-pack \
- && /usr/share/elasticsearch/bin/elasticsearch-plugin install analysis-icu
-
-RUN mv /usr/local/bin/docker-entrypoint.sh /usr/local/bin/elastic-entrypoint.sh
-
-COPY docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
-
+COPY docker-entrypoint.sh /docker-entrypoint.sh
 COPY config /usr/share/elasticsearch/config
 
 RUN mv /usr/share/elasticsearch/config/readonlyrest.yml /tmp
