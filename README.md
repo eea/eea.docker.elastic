@@ -6,8 +6,6 @@ This image is based on the official Elasticsearch Docker image
 In addition to this, it has the following plugins installed:
 
 * Analysis ICU
-* eea.elasticsearch.river.rdf
-* head
 
 ## Useful configurations
 
@@ -21,30 +19,62 @@ the HTTP API. Also this node can't run river processes.
 
 ```yaml
 esmaster:
-    image: eeacms/elastic
-    command:
-        - -Des.cluster.name="my_cluster"
-        - -Des.node.data=false
-        - -Des.http.enabled=false
-        - -Des.node.master=true
-        - -Des.node.river=_none_
+    image: eeacms/elastic:latest
+    environment:
+      ENABLE_READONLY_REST: 'false'
+      ES_JAVA_OPTS: -Xms512m -Xmx512m
+      KIBANA_HOSTNAME: kibana
+      TZ: Europe/Copenhagen
+      bootstrap.memory_lock: 'true'
+      cluster.name: es-cluster-noro
+      discovery.zen.ping.unicast.hosts: es-master
+      http.enabled: 'true'
+      node.data: 'false'
+      node.master: 'false'
+      node.name: $${HOSTNAME}
+    ulimits:
+      memlock:
+        hard: -1
+        soft: -1
+      nofile:
+        hard: 65536
+        soft: 65536
+    volumes:
+    - es-data:/usr/share/elasticsearch/data
+    ports:
+    - 9200:9200
 ```
 
 ### Running a client
 This ensures that the node can't be elected as master and is in charge
-only for responding to HTTP requests for clients. Also this node can't run
-river processes.
+only for responding to HTTP requests for clients. You 
 
 ```yaml
 esclient:
-    image: eeacms/elastic
-    command: # No data, http, can't be master
-        - elasticsearch
-        - -Des.cluster.name="my_cluster"
-        - -Des.node.data=false
-        - -Des.http.enabled=true
-        - -Des.node.master=false
-        - -Des.node.river=_none_
+    image: eeacms/elastic:latest
+    environment:
+      ENABLE_READONLY_REST: 'false'
+      ES_JAVA_OPTS: -Xms512m -Xmx512m
+      KIBANA_HOSTNAME: kibana
+      TZ: Europe/Copenhagen
+      bootstrap.memory_lock: 'true'
+      cluster.name: es-cluster-noro
+      discovery.zen.ping.unicast.hosts: es-master
+      http.enabled: 'true'
+      node.data: 'false'
+      node.master: 'false'
+      node.name: $${HOSTNAME}
+    ulimits:
+      memlock:
+        hard: -1
+        soft: -1
+      nofile:
+        hard: 65536
+        soft: 65536
+    volumes:
+    - es-data:/usr/share/elasticsearch/data
+    ports:
+    - 9200:9200
 ```
 
 ### Running a data node
@@ -53,13 +83,27 @@ using the REST api and without being able to be elected as a master.
 
 ```yaml
 esdata:
-    image: eeacms/elastic
-    command: # No data, http, can't be master
-        - elasticsearch
-        - -Des.cluster.name="my_cluster"
-        - -Des.node.data=true
-        - -Des.http.enabled=false
-        - -Des.node.master=false
+    image: eeacms/elastic:latest
+    environment:
+      ENABLE_READONLY_REST: 'false'
+      ES_JAVA_OPTS: -Xms512m -Xmx512m
+      TZ: Europe/Copenhagen
+      bootstrap.memory_lock: 'true'
+      cluster.name: es-cluster-noro
+      discovery.zen.ping.unicast.hosts: es-master
+      http.enabled: 'false'
+      node.data: 'true'
+      node.master: 'false'
+      node.name: $${HOSTNAME}
+    ulimits:
+      memlock:
+        hard: -1
+        soft: -1
+      nofile:
+        hard: 65536
+        soft: 65536
+    volumes:
+    - es-data:/usr/share/elasticsearch/data
 ```
 
 ### Increasing java heap space for the node
