@@ -40,7 +40,7 @@ if [ $(env | grep -c "http.enabled=false") -eq 0 ]; then
                        echo "
     # We trust Kibana's server side process, full access granted via HTTP authentication
     - name: \"::KIBANA-SRV::\"
-      # auth_key is good for testing, but replace it with `auth_key_sha256`!
+      # auth_key is good for testing, but replace it with auth_key_sha256!
       auth_key: $KIBANA_USER:$KIBANA_PASSWORD
       verbosity: error # don't log successful request" >> /usr/share/elasticsearch/config/readonlyrest.yml
                 fi
