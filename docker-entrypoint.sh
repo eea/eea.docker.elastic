@@ -11,7 +11,7 @@ if [ $(env | grep -c "http.enabled=false") -eq 0 ]; then
       $JAVA_HOME/bin/keytool -keystore  /usr/share/elasticsearch/ssl/self.jks -alias $HOSTNAME -export -file  /usr/share/elasticsearch/ssl/self.cert
     fi
 
-    if [ $ENABLE_READONLY_REST == "true" ]; then
+    if [ "$ENABLE_READONLY_REST" == "true" ]; then
         if [ -f /tmp/readonlyrest-* ]; then
             plugin_name=$(ls /tmp/readonlyrest-*.zip)
             /usr/share/elasticsearch/bin/elasticsearch-plugin install --batch file://$plugin_name 
