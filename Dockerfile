@@ -1,4 +1,4 @@
-FROM docker.elastic.co/elasticsearch/elasticsearch:6.8.8
+FROM docker.elastic.co/elasticsearch/elasticsearch-oss:6.8.8
 
 COPY plugins/readonlyrest-1.19.4_es6.8.8.zip /tmp/
 
