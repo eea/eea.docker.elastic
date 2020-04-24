@@ -1,4 +1,5 @@
-# Elasticsearch Docker image with EEA RDF River installed
+# Elasticsearch Docker image with the ReadOnlyRest plugin
+
 
 ## Plugins
 This image is based on the official Elasticsearch Docker image
@@ -6,6 +7,12 @@ This image is based on the official Elasticsearch Docker image
 In addition to this, it has the following plugins installed:
 
 * Analysis ICU
+* ReadOnlyREST https://readonlyrest.com/download/
+
+### X-PACK
+
+Starting version 6.8.8, we have 2 Dockerfiles and 2 respective docker images: eeacms/elastic:VERSION and eeacms/elastic:VERSION-oss, `VERSION` containing the X-PACK modules, and the `-oss` version being without it.
+
 
 ## Useful configurations
 
@@ -158,22 +165,4 @@ A cluster health API is accessible at ```http://<elasticserver-ip>:9200/_cluster
 The status will tell you how healthy the cluster is. It can be green, yellow or red. More info at [Elastic cluster health API](https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster-health.html).
 
 Another [Cluster stats API call](https://www.elastic.co/guide/en/elasticsearch/reference/current/cluster-stats.html) will give even more details about memory usage, cpus usage, open file descriptors and so on.
-
-## Development
-
-If you want to integrate a local build of the RDF River plugin into this
-image for development you can:
-
-```bash
-pushd /your/work/dir
-git clone git@github.com:eea/eea.elasticsearch.river.rdf.git
-# modify the code there
-popd
-./build_dev.sh
-# Now you have a local image called eeacms/elastic:dev that you can use
-# locally with your latest build of the river plugin
-```
-
-As a general practice, if you want to build the image locally:
-```docker build -t eeacms/elastic:dev .```
 
