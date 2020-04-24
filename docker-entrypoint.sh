@@ -46,7 +46,12 @@ if [ $(env | grep -c "http.enabled=false") -eq 0 ]; then
             fi
 
             rm -f /tmp/readonlyrest-*
-	    extra_variables="xpack.graph.enabled=false xpack.ml.enabled=false xpack.monitoring.enabled=false xpack.security.enabled=false xpack.watcher.enabled=false"
+	    
+	    if [ $(find modules -name 'x-pack*' | wc -l) -ne 0 ]; then
+		   # x-pack is incompatible with ROR
+	           extra_variables="xpack.graph.enabled=false xpack.ml.enabled=false xpack.monitoring.enabled=false xpack.security.enabled=false xpack.watcher.enabled=false"
+            fi
+
         fi
     fi
 fi
