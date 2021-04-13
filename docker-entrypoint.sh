@@ -34,6 +34,8 @@ while [ $( curl -I -s localhost:9200 | grep -c 401 )  -eq 0 ]; do sleep 10; done
 if  [ $( curl -I -s -uelastic:$elastic_password  localhost:9200 | grep -ic "200 OK" )  -eq 0 ]; then
   echo "Start setting up passwords"
   passwords=$(bin/elasticsearch-setup-passwords auto -b)
+  echo "Default passwords are set"
+  echo $passwords > /tmp/passwords
   curl -uelastic:$(echo "$passwords" | grep "elastic = " | awk '{print $4}') -X POST "localhost:9200/_security/user/elastic/_password?pretty" -H 'Content-Type: application/json' -d"{\"password\" : \"$elastic_password\"}"
   echo "Elastic superuser password set"
   for i in $( env | grep "_password" | grep -v "elastic_password" ); do var=$(echo $i | awk -F= '{print $1}');  new_password=$(echo $i | awk -F= '{print $2}'); curl -uelastic:$elastic_password -X POST "localhost:9200/_security/user/${var/_password/}/_password?pretty" -H 'Content-Type: application/json' -d"{\"password\" : \"$new_password\"}"; echo "${var/_password} user password set"; done
