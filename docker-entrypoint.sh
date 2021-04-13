@@ -5,7 +5,23 @@ set -e
 #make sure that elasticsearch volume has correct permissions
 chown -R 1000:0 /usr/share/elasticsearch/data
 
-if [ -n "$elastic_password" ] && [ $( env | grep -c "xpack.security.enabled=true" ) -eq 1 ] && [ ! -f /tmp/users_created ] && [ -z "$DO_NOT_CREATE_USERS" ]; then
+if [ -n "$elastic_password" ] && [ $( env | grep "xpack.security.enabled=true" | wc -l ) -eq 1 ] && [ ! -f /tmp/users_created ] && [ -z "$DO_NOT_CREATE_USERS" ]; then
+
+#manage certification
+if [ $(env | grep "xpack.security.transport.ssl.enabled=true" | wc -l) -eq 1 ]; then
+  certificate_path=$(env | grep "xpack.security.transport.ssl.keystore.path" | awk -F= '{print $2}')
+  keystore_password=$( env | grep "xpack.security.transport.ssl.keystore.password" | awk -F= '{print $2}') 
+  
+  if [ ! -f /usr/share/elasticsearch/config/$certificate_path ]; then
+     bin/elasticsearch-certutil cert -out config/$certificate_path -pass "$keystore_password"
+  fi
+  
+  if [ -n "$keystore_password" ]; then
+    bin/elasticsearch-keystore add xpack.security.transport.ssl.keystore.secure_password
+    bin/elasticsearch-keystore add xpack.security.transport.ssl.truststore.secure_password
+  fi
+fi
+
 /usr/local/bin/elastic-entrypoint.sh "$@" &
 
 while [ $( curl -I -s localhost:9200 | grep -c 401 )  -eq 0 ]; do sleep 10; done
