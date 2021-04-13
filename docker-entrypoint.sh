@@ -20,6 +20,7 @@ if [ $(env | grep "xpack.security.transport.ssl.enabled=true" | wc -l) -eq 1 ]; 
     bin/elasticsearch-keystore add xpack.security.transport.ssl.keystore.secure_password
     bin/elasticsearch-keystore add xpack.security.transport.ssl.truststore.secure_password
   fi
+  chown -R 1000:0 /usr/share/elasticsearch/config
 fi
 
 /usr/local/bin/elastic-entrypoint.sh "$@" &
