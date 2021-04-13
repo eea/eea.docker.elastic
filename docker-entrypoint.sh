@@ -12,6 +12,8 @@ if [ $(env | grep "xpack.security.transport.ssl.enabled=true" | wc -l) -eq 1 ]; 
   certificate_path=$(env | grep "xpack.security.transport.ssl.keystore.path" | awk -F= '{print $2}')
   keystore_password=$( env | grep "xpack.security.transport.ssl.keystore.password" | awk -F= '{print $2}') 
   
+  export KEYSTORE_PASSWORD=$keystore_password
+  
   if [ ! -f /usr/share/elasticsearch/config/$certificate_path ]; then
      bin/elasticsearch-certutil cert -out config/$certificate_path -pass "$keystore_password"
   fi
@@ -22,6 +24,8 @@ if [ $(env | grep "xpack.security.transport.ssl.enabled=true" | wc -l) -eq 1 ]; 
   fi
   chown -R 1000:0 /usr/share/elasticsearch/config
 fi
+
+export ELASTIC_PASSWORD=$elastic_password
 
 /usr/local/bin/elastic-entrypoint.sh "$@" &
 
