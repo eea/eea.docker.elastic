@@ -1,9 +1,6 @@
 #!/bin/bash
 set -e
 
-#default variable values
-read_only_role_json='{"elasticsearch":{"cluster":["monitor"],"indices":[{"names":["*"],"privileges":["read","view_index_metadata"]},{"names":[".kibana"],"privileges":["read","view_index_metadata"],"field_security":{"grant":["*"]}}],"run_as":[]},"kibana":[{"spaces":["*"],"base":["read"],"feature":{}}]}'
-
 #make sure that elasticsearch volume has correct permissions
 chown -R 1000:0 /usr/share/elasticsearch/data
 
@@ -68,23 +65,6 @@ else
 		echo "${var/_password} user password set";
 	    fi	
     done
-fi
-
-if [[ ${ALLOW_ANON_RO}" == "true" ]] && [ -n "${ANON_PASSWORD}" ]; then
-
-echo "Setting default 'read_only' role"
-
-READ_ONLY_ROLE_JSON=${READ_ONLY_ROLE_JSON:-$read_only_role_json}
-
-if  [ $( curl -I -s -uelastic:$elastic_password  localhost:9200/api/security/role/read_only | grep -ic "200 OK" ) -eq 0 ]; then
-   curl  -uelastic:$elastic_password -X PUT -H 'Content-Type: application/json' localhost:9200/api/security/role/read_only -d"$READ_ONLY_ROLE_JSON"
-fi
-
-echo "Setting default 'anonymous_service_account' user"
-if  [ $( curl -I -s -uelastic:$elastic_password  localhost:9200/internal/security/users/anonymous_service_account | grep -ic "200 OK" ) -eq 0 ]; then
-   curl  -uelastic:$elastic_password -X PUT -H 'Content-Type: application/json' localhost:9200/internal/security/users/anonymous_service_account -d"{\"password\":\"$ANON_PASSWORD\",\"username\":\"anonymous_service_account\",\"full_name\":\"\",\"email\":\"\",\"roles\":[\"read_only\"]}"
-fi
-
 fi
 
 touch /tmp/users_created
