@@ -1,6 +1,8 @@
 #!/bin/bash
 set -e
 
+#default variable values
+read_only_role_json='{"elasticsearch":{"cluster":["monitor"],"indices":[{"names":["*"],"privileges":["read","view_index_metadata"]},{"names":[".kibana"],"privileges":["read","view_index_metadata"],"field_security":{"grant":["*"]}}],"run_as":[]},"kibana":[{"spaces":["*"],"base":["read"],"feature":{}}]}'
 
 #make sure that elasticsearch volume has correct permissions
 chown -R 1000:0 /usr/share/elasticsearch/data
@@ -36,22 +38,56 @@ if  [ $( curl -I -s -uelastic:$elastic_password  localhost:9200 | grep -ic "200 
   passwords=$(bin/elasticsearch-setup-passwords auto -b)
   echo "Default passwords are set"
   echo $passwords > /tmp/passwords
-  curl -uelastic:$(echo "$passwords" | grep "elastic = " | awk '{print $4}') -X POST "localhost:9200/_security/user/elastic/_password?pretty" -H 'Content-Type: application/json' -d"{\"password\" : \"$elastic_password\"}"
+  old_password=$(echo "$passwords" | grep "elastic = " | awk '{print $4}')
+  curl -uelastic:$old_password -X POST "localhost:9200/_security/user/elastic/_password?pretty" -H 'Content-Type: application/json' -d"{\"password\" : \"$elastic_password\"}"
   echo "Elastic superuser password set"
-  for i in $( env | grep "_password" | grep -v "elastic_password" ); do var=$(echo $i | awk -F= '{print $1}');  new_password=$(echo $i | awk -F= '{print $2}'); curl -uelastic:$elastic_password -X POST "localhost:9200/_security/user/${var/_password/}/_password?pretty" -H 'Content-Type: application/json' -d"{\"password\" : \"$new_password\"}"; echo "${var/_password} user password set"; done
- touch /tmp/users_created
+  sleep 5
+  if  [ $( curl -I -s -uelastic:$elastic_password  localhost:9200 | grep -ic "200 OK" )  -eq 1 ]; then
+	  for i in $( env | grep "_password" | grep -v "elastic_password" ); do 
+	     var=$(echo $i | awk -F= '{print $1}'); 
+	     new_password=$(echo $i | awk -F= '{print $2}'); 
+	     curl -uelastic:$elastic_password -X POST "localhost:9200/_security/user/${var/_password/}/_password?pretty" -H 'Content-Type: application/json' -d"{\"password\" : \"$new_password\"}"; 
+	     echo "${var/_password} user password set"; 
+	   done
+  else
+      echo "There is a problem with the setting of the elastic superuser password, will exit"
+      echo "The auto-generated password is $old_password"
+      exit 1
+  fi
+ 
+ 
+ 
 else
     for i in $( env | grep "_password" | grep -v "elastic_password" ); do 
 	    var=$(echo $i | awk -F= '{print $1}');  
 	    new_password=$(echo $i | awk -F= '{print $2}'); 
+	    # check if all other passwords are set correctly
 	    if  [ $( curl -I -s -u${var/_password/}:$new_password  localhost:9200 | grep -ic "200 OK" )  -eq 0 ]; then
                 echo "Start setting up password for ${var/_password/} "
 	        curl -uelastic:$elastic_password -X POST "localhost:9200/_security/user/${var/_password/}/_password?pretty" -H 'Content-Type: application/json' -d"{\"password\" : \"$new_password\"}"; 
 		echo "${var/_password} user password set";
 	    fi	
     done
-    touch /tmp/users_created
 fi
+
+if [[ ${ALLOW_ANON_RO}" == "true" ]] && [ -n "${ANON_PASSWORD}" ]; then
+
+echo "Setting default 'read_only' role"
+
+READ_ONLY_ROLE_JSON=${READ_ONLY_ROLE_JSON:-$read_only_role_json}
+
+if  [ $( curl -I -s -uelastic:$elastic_password  localhost:9200/api/security/role/read_only | grep -ic "200 OK" ) -eq 0 ]; then
+   curl  -uelastic:$elastic_password -X PUT -H 'Content-Type: application/json' localhost:9200/api/security/role/read_only -d"$READ_ONLY_ROLE_JSON"
+fi
+
+echo "Setting default 'anonymous_service_account' user"
+if  [ $( curl -I -s -uelastic:$elastic_password  localhost:9200/internal/security/users/anonymous_service_account | grep -ic "200 OK" ) -eq 0 ]; then
+   curl  -uelastic:$elastic_password -X PUT -H 'Content-Type: application/json' localhost:9200/internal/security/users/anonymous_service_account -d"{\"password\":\"$ANON_PASSWORD\",\"username\":\"anonymous_service_account\",\"full_name\":\"\",\"email\":\"\",\"roles\":[\"read_only\"]}"
+fi
+
+fi
+
+touch /tmp/users_created
 
 wait 
 
