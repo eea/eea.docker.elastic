@@ -6,6 +6,14 @@ chown -R 1000:0 /usr/share/elasticsearch/data
 
 if [ -n "$elastic_password" ] && [ $( env | grep "xpack.security.enabled=true" | wc -l ) -eq 1 ] && [ ! -f /tmp/users_created ] && [ -z "$DO_NOT_CREATE_USERS" ]; then
 
+if [ "${#elastic_password}" -lt 6 ]; then
+  echo "ERROR - elastic password is set to less to 6 characters, exiting"
+  exit 1
+fi
+
+
+
+
 #manage certification
 if [ $(env | grep "xpack.security.transport.ssl.enabled=true" | wc -l) -eq 1 ]; then
   certificate_path=$(env | grep "xpack.security.transport.ssl.keystore.path" | awk -F= '{print $2}')
