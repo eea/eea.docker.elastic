@@ -7,15 +7,12 @@ chown -R 1000:0 /usr/share/elasticsearch/data
 
 
 
-if [ -n "$elastic_password" ] && [ $( env | grep "xpack.security.enabled=true" | wc -l ) -eq 1 ] && [ ! -f /tmp/users_created ] && [ -z "$DO_NOT_CREATE_USERS" ]; then
+if [ -n "$elastic_password" ] && [ $( env | grep "xpack.security.enabled=true" | wc -l ) -eq 1 ] && [ -z "$DO_NOT_CREATE_USERS" ]; then
 
 if [ "${#elastic_password}" -lt 6 ]; then
   echo "ERROR - elastic password is set to less to 6 characters, exiting"
   exit 1
 fi
-
-
-
 
 #manage certification
 if [ $(env | grep "xpack.security.transport.ssl.enabled=true" | wc -l) -eq 1 ]; then
@@ -29,8 +26,8 @@ if [ $(env | grep "xpack.security.transport.ssl.enabled=true" | wc -l) -eq 1 ]; 
   fi
   
   if [ -n "$keystore_password" ]; then
-    bin/elasticsearch-keystore add xpack.security.transport.ssl.keystore.secure_password
-    bin/elasticsearch-keystore add xpack.security.transport.ssl.truststore.secure_password
+    echo "$keystore_password" | bin/elasticsearch-keystore add xpack.security.transport.ssl.keystore.secure_password
+    echo "$keystore_password" | bin/elasticsearch-keystore add xpack.security.transport.ssl.truststore.secure_password
   fi
   chown -R 1000:0 /usr/share/elasticsearch/config
 fi
@@ -53,7 +50,7 @@ if [ -f /usr/share/elasticsearch/config/userscreated ]; then
 
          if [ -z "$CHECK_USERS" ]; then
             /usr/local/bin/elastic-entrypoint.sh "$@"
-         fi
+	 fi
 fi
 
 
@@ -93,7 +90,7 @@ if  [ $( curl -I -s -uelastic:$elastic_password  localhost:9200 | grep -ic "200 
             exit 1
   fi
 else
-   echo "Elastic password is already set"	
+   echo "Elastic password is set"	
    if  [ ! -f /usr/share/elasticsearch/config/userscreated ]; then
 	   echo "elastic = $elastic_password" > /usr/share/elasticsearch/config/userscreated
    fi	   
@@ -108,6 +105,7 @@ for i in $( env | grep "_password" | grep -v "elastic_password" ); do
      old_password=$(cat /usr/share/elasticsearch/config/userscreated | grep "${user} = " | awk '{print $4}')
   
      if [[ ! "$old_pasword" == "$new_password" ]]; then
+	     echo "Saved password different from new password for user $user, resetting it"
              curl -uelastic:$elastic_password -X POST "localhost:9200/_security/user/${user}/_password?pretty" -H 'Content-Type: application/json' -d"{\"password\" : \"$new_password\"}"; 
              if  [ $( curl -I -s -u${user}:$new_password  localhost:9200 | grep -ic "200 OK" )  -eq 1 ]; then
                 echo "${user} password set succesfully"
@@ -123,14 +121,13 @@ for i in $( env | grep "_password" | grep -v "elastic_password" ); do
       fi	     
 done
 
-touch /tmp/users_created
-
 wait 
 
 fi
 
 else
 
+  #force restart on data nodes for them to have the passwords & ssl
   if [ -n "$elastic_password" ] && [ -n "$DO_NOT_CREATE_USERS" ] && [ ! -f /usr/share/elasticsearch/config/userscreated ] ; then	
    
      #data node, needs to start without users and then restart when they are created
