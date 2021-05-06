@@ -51,49 +51,50 @@ if [ -f /usr/share/elasticsearch/config/userscreated ]; then
          if [ -z "$CHECK_USERS" ]; then
             /usr/local/bin/elastic-entrypoint.sh "$@"
 	 fi
+else
+      CHECK_USERS="yes"   
 fi
 
 
-if [ -f /usr/share/elasticsearch/config/userscreated ] && [ -n "$CHECK_USERS" ] || [ ! -f /usr/share/elasticsearch/config/userscreated ]; then
+if [ -n "$CHECK_USERS" ]; then
 
 /usr/local/bin/elastic-entrypoint.sh "$@" &
 
+#wait for the interface to start
 while [ $( curl -I -s localhost:9200 | grep -c 401 )  -eq 0 ]; do sleep 10; done
 
-#ensure elastic password is ok
-if  [ $( curl -I -s -uelastic:$elastic_password  localhost:9200 | grep -ic "200 OK" )  -eq 0 ]; then
-  if  [ ! -f /usr/share/elasticsearch/config/userscreated ]; then 
-  	echo "Start setting up passwords"
-  	passwords=$(bin/elasticsearch-setup-passwords auto -b)
-  	old_password=$(echo "$passwords" | grep "elastic = " | awk '{print $4}')
-	sleep 5
-        if  [ $( curl -I -s -uelastic:$old_password  localhost:9200 | grep -ic "200 OK" )  -eq 1 ]; then
-		echo "Passwords are set correctly"
-                echo $password > /usr/share/elasticsearch/config/userscreated
-	else
-		echo "There is a problem with the setting up of the passwords"
-		echo "The current elastic user password does not work, and there is no old one"
-		exit 1
-        fi
-  else
-        old_password=$(cat /usr/share/elasticsearch/config/userscreated | grep "elastic = " | awk '{print $4}')
-  fi
- 
-  curl -uelastic:$old_password -X POST "localhost:9200/_security/user/elastic/_password?pretty" -H 'Content-Type: application/json' -d"{\"password\" : \"$elastic_password\"}"
-  sleep 5
-  if  [ $( curl -I -s -uelastic:$elastic_password  localhost:9200 | grep -ic "200 OK" )  -eq 1 ]; then
-          echo "Elastic superuser password set"
-	  sed -i "s/elastic = .*/elastic = $elastic_password/" /usr/share/elasticsearch/config/userscreated
-  else
-	    echo "There is a problem with the setting of the elastic superuser password, will exit"
-            echo "The auto-generated password is $old_password"
-            exit 1
-  fi
+#check elastic password
+if [ -f /usr/share/elasticsearch/config/userscreated ]; then
+	old_password=$(cat /usr/share/elasticsearch/config/userscreated | grep "PASSWORD elastic = " | awk '{print $4}')
 else
-   echo "Elastic password is set"	
-   if  [ ! -f /usr/share/elasticsearch/config/userscreated ]; then
-	   echo "PASSWORD elastic = $elastic_password" > /usr/share/elasticsearch/config/userscreated
-   fi	   
+	old_password="$elastic_password"
+fi
+
+if [[ ! "$old_password" == "$elastic_password" ]]; then
+	echo "Elastic password changed, waiting for elastic to be authorized and then resetting it"
+	while [ $( curl -I -s -uelastic:$old_password localhost:9200 | grep -i "200 OK" | wc -l )  -eq 0 ]; do sleep 10; done
+        curl -uelastic:$old_password -X POST "localhost:9200/_security/user/elastic/_password?pretty" -H 'Content-Type: application/json' -d"{\"password\" : \"$elastic_password\"}"
+        if  [ $( curl -I -s -uelastic:$elastic_password  localhost:9200 | grep -ic "200 OK" )  -eq 1 ]; then
+            echo "Elastic superuser password set"
+            sed -i "s/elastic = .*/elastic = $elastic_password/" /usr/share/elasticsearch/config/userscreated
+        else
+            echo "There is a problem with the setting of the elastic superuser password, will exit"
+            exit 1
+        fi
+fi
+
+count=0
+while [ $( curl -I -s -uelastic:$elastic_password localhost:9200 | grep -i "200 OK" | wc -l )  -eq 0 ] && [ $count -lt 10 ]; do let count=count+1; sleep 10; done
+
+if [ $count -eq 10 ]; then
+	echo "There is a problem connecting to elastic using the password set in the environment, please check"
+	exit 1
+fi
+
+if [ -f /usr/share/elasticsearch/config/userscreated ]; then
+    sed -i "s/elastic = .*/elastic = $elastic_password/" /usr/share/elasticsearch/config/userscreated
+else
+    echo "PASSWORD elastic = $elastic_password" > /usr/share/elasticsearch/config/userscreated
 fi
 
 # check all other passwords
