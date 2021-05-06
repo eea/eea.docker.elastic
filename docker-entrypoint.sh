@@ -43,7 +43,7 @@ if [ -f /usr/share/elasticsearch/config/userscreated ]; then
              var=$(echo $i | awk -F= '{print $1}');
 	     user=${var/_password/}
              new_password=$(echo $i | awk -F= '{print $2}');
-	     if [ $(grep "$user = $new_password" /usr/share/elasticsearch/config/userscreated | wc -l ) -eq 0 ]; then
+	     if [ $(grep "$user = $new_password$" /usr/share/elasticsearch/config/userscreated | wc -l ) -eq 0 ]; then
 		    CHECK_USERS='yes'
 	     fi
          done
