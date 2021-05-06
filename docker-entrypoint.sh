@@ -92,7 +92,7 @@ if  [ $( curl -I -s -uelastic:$elastic_password  localhost:9200 | grep -ic "200 
 else
    echo "Elastic password is set"	
    if  [ ! -f /usr/share/elasticsearch/config/userscreated ]; then
-	   echo "elastic = $elastic_password" > /usr/share/elasticsearch/config/userscreated
+	   echo "PASSWORD elastic = $elastic_password" > /usr/share/elasticsearch/config/userscreated
    fi	   
 fi
 
@@ -112,7 +112,7 @@ for i in $( env | grep "_password" | grep -v "elastic_password" ); do
 		if [ -n "$old_password" ]; then
                    sed -i "s/${user} = .*/${user} = $new_password/" /usr/share/elasticsearch/config/userscreated
 	        else
-                   echo "${user} = $new_password" >> /usr/share/elasticsearch/config/userscreated
+                   echo "PASSWORD ${user} = $new_password" >> /usr/share/elasticsearch/config/userscreated
 		fi  
              else
                 echo "There is a problem with the setting of user ${user} password, exiting"
@@ -131,7 +131,7 @@ else
   if [ -n "$elastic_password" ] && [ -n "$DO_NOT_CREATE_USERS" ] && [ ! -f /usr/share/elasticsearch/config/userscreated ] ; then	
    
      #data node, needs to start without users and then restart when they are created
-     export ELASTIC_PASSWORD=$elastic_password
+     #export ELASTIC_PASSWORD=$elastic_password
 
      /usr/local/bin/elastic-entrypoint.sh "$@" &
 
