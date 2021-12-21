@@ -1,6 +1,6 @@
-FROM docker.elastic.co/elasticsearch/elasticsearch-oss:6.8.8
+FROM docker.elastic.co/elasticsearch/elasticsearch-oss:6.8.22
 
-COPY plugins/readonlyrest-1.19.4_es6.8.8.zip /tmp/
+COPY plugins/readonlyrest-* /tmp/
 
 
 RUN /usr/share/elasticsearch/bin/elasticsearch-plugin install analysis-icu 
