@@ -5,6 +5,13 @@ set -e
 chown -R 1000:0 /usr/share/elasticsearch/data
 
 
+USER="$(id -u)"
+
+if [ "$USER" = '0' ]; then
+  sudo="gosu 1000"
+else
+  sudo=""
+fi
 
 
 if [ -n "$elastic_password" ] && [ $( env | grep "xpack.security.enabled=true" | wc -l ) -eq 1 ] && [ -z "$DO_NOT_CREATE_USERS" ]; then
@@ -49,7 +56,7 @@ if [ -f /usr/share/elasticsearch/config/userscreated ]; then
          done
 
          if [ -z "$CHECK_USERS" ]; then
-            /usr/local/bin/elastic-entrypoint.sh "$@"
+            $sudo /usr/local/bin/elastic-entrypoint.sh "$@"
 	 fi
 else
       CHECK_USERS="yes"   
@@ -58,7 +65,7 @@ fi
 
 if [ -n "$CHECK_USERS" ]; then
 
-/usr/local/bin/elastic-entrypoint.sh "$@" &
+$sudo /usr/local/bin/elastic-entrypoint.sh "$@" &
 
 #wait for the interface to start
 while [ $( curl -I -s localhost:9200 | grep -c 401 )  -eq 0 ]; do sleep 10; done
@@ -134,7 +141,7 @@ else
      #data node, needs to start without users and then restart when they are created
      #export ELASTIC_PASSWORD=$elastic_password
 
-     /usr/local/bin/elastic-entrypoint.sh "$@" &
+     $sudo /usr/local/bin/elastic-entrypoint.sh "$@" &
 
      while [ ! -f /usr/share/elasticsearch/config/userscreated ]; do sleep 10; done
 
@@ -144,7 +151,7 @@ else
 
   else 
 
-     /usr/local/bin/elastic-entrypoint.sh "$@"
+     $sudo /usr/local/bin/elastic-entrypoint.sh "$@"
   
   fi
 fi
