@@ -7,5 +7,4 @@ path:
 
 network.host: 0.0.0.0
 
-
-
+path.repo: ["/usr/share/elasticsearch/snapshot"]
